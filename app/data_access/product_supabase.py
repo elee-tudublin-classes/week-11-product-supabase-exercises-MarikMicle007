@@ -16,7 +16,7 @@ supabase: Client = create_client(db_url, db_key)
 # get all products
 def dataGetProducts():
     response = (supabase.table("product")
-                .select("*")
+                .select("*, category(name)")
                 .order("title", desc=False)
                 .execute()
     )
@@ -43,8 +43,23 @@ def dataUpdateProduct(product: Product) :
         .upsert(product.dict()) # convert product object to dict - required by Supabase
         .execute()
     )
+
+
+    response2 = (
+        supabase.table("product")
+        .select("*,category(name)")
+        .eq("id", response.data[0]['id'])
+        .execute()
+    )
+
+
+
     # result is 1st item in the list
-    return response.data[0]
+    return response2.data[0]
+
+
+
+
 
 # add product, accepts product object
 def dataAddProduct(product: Product) :
@@ -53,8 +68,21 @@ def dataAddProduct(product: Product) :
         .insert(product.dict()) # convert product object to dict - required by Supabase
         .execute()
     )
+
+    response2 = (
+        supabase.table("product")
+        .select("*,category(name)")
+        .eq("id", response.data[0]['id'])
+        .execute()
+    )
+
+    return response2.data[0]
+
+   
+
+    
     # result is 1st item in the list
-    return response.data[0]
+   # return response.data[0]
 
 # get all categories
 def dataGetCategories():
@@ -77,3 +105,17 @@ def dataDeleteProduct(id):
         .execute()
     )
     return response.data
+
+
+def dataGetProductsByCategoryID(id):
+    response = (supabase.table("product")
+                .select("*, category(name)")
+                .eq("category_id",id)
+                .order("title", desc=False)
+                .execute()
+    )
+
+    return response.data
+
+
+# dataGetProductsByCategoryID(id)
